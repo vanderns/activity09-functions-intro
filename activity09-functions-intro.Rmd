@@ -1,6 +1,6 @@
 ---
 title: "Activity 9"
-author: "Name"
+author: "Nathan Vandermeer"
 output: github_document
 ---
 
@@ -14,8 +14,10 @@ In this activity, we will create a function for calculating the range of a numer
 
 To begin, we need `{tidyverse}` and `{gapminder}` (for a dataset to test our functions with) packages loaded.
 
-
-
+```{r}
+library(tidyverse)
+library(gapminder)
+```
 
 ## Part I
 
@@ -23,7 +25,8 @@ To begin, we need `{tidyverse}` and `{gapminder}` (for a dataset to test our fun
 
 Look at the output of the `max`, `min`, and `range` functions.
 Use these with appropriate variables from the `gapminder::gapminder` dataset using the `dataset$variable` method.
-Remember that in statistics *range = max - min*.
+Remember that in statistics 
+**range = max - min**
 Describe how you could you use the output from some combination of the above functions to calculate the range?
 Note that I can think of two different methods: 1) using `min` and `max`, and 2) using `range` with the square bracket (`[]`) method.
 
@@ -93,8 +96,13 @@ Test this function to verify that it works.
 Below check this function using the `lifeExp` column of the `gapminder` dataset.
 Also, verify that it gets the correct result for `1:10` (a sequence of numbers starting at 1 and ending at 10, increasing by 1), `5:100`, `gapminder$pop` (the population of each country in the `gapminder` data set), and `gapminder$gdpPercap`.
 
-
-
+```{r}
+diff_range(gapminder$lifeExp)
+diff_range(1:10)
+diff_range(5:100)
+diff_range(gapminder$pop)
+diff_range(gapminder$gdpPercap)
+```
 
 ### Your turn
 
@@ -110,16 +118,35 @@ Convince yourself that you know how to use it by being able to explain what the 
 
 Also, explore this function with different `probs`.
 
+```{r}
+quantile(gapminder$lifeExp)[1]-quantile(gapminder$lifeExp)[5]
+quantile(gapminder$lifeExp,probs=c(.33,.67))
+```
 
 
 Once, you feel comfortable with the `quantile` function, create a function named `quantile_range` that calculates the statistical range.
 
+```{r}
+quantile_range <- function(x){
+  if(is.numeric(x)==FALSE){
+    stop("Data is not numeric")}
+  return(quantile(x)[4]-quantile(x)[2])
+}
+```
 
 
 Test your function to verify that it works.
 Below check this function using the `lifeExp` column of the `gapminder` dataset.
 Also, verify that it gets the correct result for `1:10` (a sequence of numbers starting at 1 and ending at 10, increasing by 1), `5:100`, `gapminder$pop` (the population of each country in the `gapminder` data set), and `gapminder$gdpPercap`.
 
+```{r}
+quantile_range(gapminder$lifeExp)
+quantile_range(1:10)
+quantile_range(5:100)
+quantile_range(gapminder$pop)
+quantile_range(gapminder$gdpPercap)
+quantile(1:10)
+```
 
 
 ![](README-img/noun_pause.png) **Planned Pause Point**: This is the end of Part 1 of this activity. You can use the rest of the class period working on your project. The rest of this activity will be completed in our next class session/at home.
@@ -136,6 +163,11 @@ When we write functions, we should also make sure that it fails when we expect i
 
 Below, check that our function breaks for each of the above tests.
 
+```{r}
+quantile_range(gapminder)
+quantile_range(gapminder$country)
+quantile_range("Go Lakers!")
+```
 
 For functions that will be used again, it is a good practice to add argument validity checks.
 
@@ -160,10 +192,12 @@ Explore the two argument validity checks by adding them to the beginning of your
 Calculating the range of a set of data is convenient, but it would be nice if we could determine the range between certain quantiles too.
 For example, the interquartile range (*IQR = Q3 − Q1*).
  
-
-
-
-
+```{r}
+quantile_range <- function(x,upper,lower){
+  stopifnot(is.numeric(x),is.numeric(upper),is.numeric(lower))
+  return(quantile(x,probs=upper)-quantile(x,probs=lower))
+}
+```
 
 Update your function so that it has the arguments `x` and `probs` and calculates the differences between two specified quantiles supplied to the `probs` argument.
 Test your function with:
@@ -173,9 +207,20 @@ Test your function with:
 
 Also test that your function breaks when it should.
 
+```{r}
+quantile_range(gapminder$lifeExp, 0.75,0.25)
+quantile_range(gapminder$lifeExp, 1,0)
+quantile_range(gapminder, 1, 0)
+quantile_range(gapminder$lifeExp,'Fight', 1)
+```
 
-
-
+```{r}
+quantile_range <- function(x,probs){
+  stopifnot(is.numeric(x),is.numeric(probs))
+  return(quantile(x,probs=probs[2])-quantile(x,probs=probs[1]))
+}
+quantile_range(gapminder$lifeExp, probs = c(0.25, 0.75))
+```
 
 Since you we using the `quantile` function in the `quantile_range` function, we should be consistent with the arguments that we specify.
 This is not necessary, but is extremely beneficial for humans to read, write, and use the code.
@@ -201,8 +246,14 @@ Update your `quantile_range` function below (copy, paste, edit) to have the defa
 Check that your function works by specifying and not specifying the `probs` argument.
 Then, upgrade your function to contain a validity check for the new `probs` argument.
 
-
-
+```{r}
+quantile_range <- function(x,probs=c(0,1,na.rm = TRUE, ...)){
+  stopifnot(is.numeric(x),is.numeric(probs))
+  return(quantile(x,probs=probs[2])-quantile(x,probs=probs[1]))
+}
+quantile_range(gapminder$lifeExp, probs = c(0.25, 0.75))
+quantile_range(gapminder$lifeExp)
+```
 
 ### Handling `NA`s
 
